@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
     <title>Screen Video</title>
-    <link rel="apple-touch-icon" href="{{asset("app-assets/images/ico/apple-icon-120.png")}}")}}">
+    <link rel="apple-touch-icon" href="{{asset("app-assets/images/ico/apple-icon-120.png")}}">
     <link rel="shortcut icon" type="image/x-icon" href="{{asset("app-assets/images/ico/favicon.ico")}}">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Quicksand:300,400,500,700"
     rel="stylesheet">
@@ -35,7 +35,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <link rel= "stylesheet" href= "https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css" >
-  {{-- @livewireStyles --}}
+  @livewireStyles
 </head>
 <body class="vertical-layout vertical-content-menu 2-columns menu-expanded fixed-navbar"
     data-open="click" data-menu="vertical-content-menu" data-col="2-columns">
@@ -123,10 +123,21 @@
                                 </li>
                             </ul>
                         </li>
+                        <li class=" nav-item"><a href=""><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">TV display time </span></a>
+                            <ul class="menu-content">
+                                <li class="{{ Route::currentRouteName() == 'tv_display_times.index' ? 'active':'' }}">
+                                    <a class="menu-item " href="{{route('tv_display_times.index')}}" data-i18n="nav.dash.crypto">index</a>
+                                </li>
+                                <li class="{{ Route::currentRouteName() == 'tv_display_times.create' ? 'active':'' }}">
+                                    <a class="menu-item" href="{{route('tv_display_times.create')}}" data-i18n="nav.dash.sales">create</a>
+                                </li>
+                            </ul>
+                        </li>
                     </ul>
                 </div>
             </div>
-            <div class="content-body ">
+            <div class="content-body">
+                {{-- {{ $slot }} --}}
                 @yield('content')
             </div>
         </div>
@@ -155,9 +166,43 @@
     <script src="{{asset("app-assets/js/scripts/customizer.js")}}" type="text/javascript"></script>
     <!-- END MODERN JS-->
     <!-- BEGIN PAGE LEVEL JS-->
-    <script src="{{asset("app-assets/js/scripts/pages/dashboard-ecommerce.js")}}" type="text/javascript"></script>
+    {{-- <script src="{{asset("app-assets/js/scripts/pages/dashboard-ecommerce.js")}}" type="text/javascript"></script> --}}
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.13.0/Sortable.min.js"></script>
+
+    <script>
+        document.addEventListener('livewire:load', function () {
+            let sortableList = document.getElementById('sortable-list');
+            let confirmButton = document.getElementById('confirm-order-btn');
+            let updatedOrder = [];
+    
+            // Ensure that the sortableList exists in the DOM
+            if (sortableList) {
+                // Initialize SortableJS manually
+                new Sortable(sortableList, {
+                    animation: 150,
+                    handle: 'div',
+                    onEnd: function (event) {
+                        // Capture the new order
+                        updatedOrder = Array.from(event.target.children).map((el, index) => el.getAttribute('wire:sortable.item'));
+    
+                        // Show the confirm button
+                        confirmButton.style.display = 'block';
+                    }
+                });
+            }
+    
+            // Handle the confirm button click
+            confirmButton.addEventListener('click', function () {
+                // Emit the Livewire event with the updated order
+                Livewire.emit('updateOrder', updatedOrder);
+    
+                // Hide the confirm button after order is confirmed
+                confirmButton.style.display = 'none';
+            });
+        });
+    </script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -184,9 +229,7 @@
         });
     </script>
 
-
-
-    {{-- @livewireScripts --}}
+    @livewireScripts
     @stack('js')
 
 </body>

@@ -79,4 +79,17 @@ class TvController extends Controller
         }
     }
     
+    public function activateTv(Request $request, $id)
+    {
+        // Deactivate all other TVs
+        Tv::where('is_active', 1)->update(['is_active' => 0]);
+
+        // Activate the selected TV
+        $tv = Tv::findOrFail($id);
+        $tv->is_active = $request->is_active;
+        $tv->save();
+
+        return response()->json(['success' => true, 'message' => 'TV activation updated.']);
+    }
+
 }

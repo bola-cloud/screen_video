@@ -20,6 +20,7 @@
                             <th>ID</th>
                             <th>Name</th>
                             <th>Location</th>
+                            <th>Is Active</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -30,7 +31,11 @@
                                 <td>{{ $tv->name }}</td>
                                 <td>{{ $tv->location }}</td>
                                 <td>
+                                    <input type="checkbox" class="is_active_switch" data-id="{{ $tv->id }}" {{ $tv->is_active ? 'checked' : '' }}>
+                                </td>
+                                <td>
                                     <a href="{{ route('tvs.edit', $tv->id) }}" class="btn btn-warning">Edit</a>
+                                    <a href="{{ route('tv.ad-order', $tv->id) }}" class="btn btn-info"> show orders </a>
                                     <form action="{{ route('tvs.destroy', $tv->id) }}" method="POST" style="display:inline-block;">
                                         @csrf
                                         @method('DELETE')
@@ -45,5 +50,31 @@
         </div>
     </div>
 </div>
-   
+
+<script>
+    document.querySelectorAll('.is_active_switch').forEach(item => {
+        item.addEventListener('change', function() {
+            const tvId = this.getAttribute('data-id');
+            const isActive = this.checked ? 1 : 0;
+
+            fetch(`/tvs/activate/${tvId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ is_active: isActive })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('TV activation status updated successfully.');
+                } else {
+                    alert('Failed to update activation status.');
+                }
+            });
+        });
+    });
+</script>
+
 @endsection

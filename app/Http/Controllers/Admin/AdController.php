@@ -38,10 +38,16 @@ class AdController extends Controller
 
     public function chooseTvs(Advertisement $ad)
     {
-        // Pass the ad and all TVs to the view for TV assignment
         $tvs = Tv::all();
+
+        // Check if there are no TVs available
+        if ($tvs->isEmpty()) {
+            return redirect()->route('ads.index')->with('error', 'There are no TVs available to display this ad.');
+        }
+
         return view('admin.ads.choose_tvs', compact('ad', 'tvs'));
     }
+
 
     public function storeTvs(Request $request, Advertisement $ad)
     {
@@ -152,6 +158,18 @@ class AdController extends Controller
         return redirect()->route('ads.edit', $ad->id)->with('success', 'Ad updated successfully with new or updated schedules!');
     }
     
-
+    public function activateAd(Request $request, $id)
+    {
+        // Deactivate all other ads
+        Advertisement::where('is_active', 1)->update(['is_active' => 0]);
+    
+        // Activate the selected ad
+        $ad = Advertisement::findOrFail($id);
+        $ad->is_active = $request->is_active;
+        $ad->save();
+    
+        return response()->json(['success' => true, 'message' => 'Ad activation updated.']);
+    }
+    
 
 }

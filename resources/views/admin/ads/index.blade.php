@@ -14,6 +14,10 @@
                     <div class="alert alert-success">{{ session('success') }}</div>
                 @endif
 
+                @if(session('error'))
+                    <div class="alert alert-danger">{{ session('error') }}</div>
+                @endif
+
                 <table class="table">
                     <thead>
                         <tr>
@@ -22,6 +26,7 @@
                             <th>Brand</th>
                             <th>Video Link</th>
                             <th>Video Duration</th>
+                            <th>Is Active</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -33,6 +38,9 @@
                                 <td>{{ $ad->brand }}</td>
                                 <td>{{ $ad->video_link }}</td>
                                 <td>{{ $ad->video_duration }}</td>
+                                <td>
+                                    <input type="checkbox" role="switch" class="is_active_switch" data-id="{{ $ad->id }}" {{ $ad->is_active ? 'checked' : '' }}>
+                                </td>
                                 <td>
                                     <a href="{{ route('ads.edit', $ad->id) }}" class="btn btn-warning">Edit</a>
                                     <a href="{{ route('ads.chooseTvs', $ad->id) }}" class="btn btn-info">Assign TVs</a>
@@ -50,4 +58,31 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.querySelectorAll('.is_active_switch').forEach(item => {
+        item.addEventListener('change', function() {
+            const adId = this.getAttribute('data-id');
+            const isActive = this.checked ? 1 : 0;
+
+            fetch(`/ads/activate/${adId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ is_active: isActive })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Ad activation status updated successfully.');
+                } else {
+                    alert('Failed to update activation status.');
+                }
+            });
+        });
+    });
+</script>
+
 @endsection
