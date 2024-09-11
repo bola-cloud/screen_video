@@ -14,6 +14,7 @@ class Advertisement extends Model
         'video_link',
         'video_duration',
         'client_id',
+        'is_active',
     ];
 
     // Relationships

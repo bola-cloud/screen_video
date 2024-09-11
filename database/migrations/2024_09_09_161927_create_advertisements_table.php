@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('brand');
             $table->string('video_link');
             $table->time('video_duration')->nullable(); // Stores time as H:i:s format
+            $table->boolean('is_active')->default(0);
             $table->unsignedBigInteger('client_id')->nullable();
             $table->foreign('client_id')->references('id')->on('users')
             ->onUpdate('CASCADE')->onDelete('CASCADE');

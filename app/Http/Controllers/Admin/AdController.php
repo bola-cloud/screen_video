@@ -46,12 +46,19 @@ class AdController extends Controller
     public function storeTvs(Request $request, Advertisement $ad)
     {
         $data = $request->validate([
-            'tvs' => 'required|array', // Array of selected TV IDs
+            'tvs' => 'sometimes|array', // Array of selected TV IDs (may not be provided if none selected)
             'start_at' => 'required|date',
             'end_at' => 'required|date|after_or_equal:start_at',
         ]);
     
-        foreach ($data['tvs'] as $tv_id) {
+        $selectedTvs = $data['tvs'] ?? []; // Handle the case where no TV is selected
+    
+        // Remove relations for deselected TVs
+        AdSchedule::where('advertisement_id', $ad->id)
+            ->whereNotIn('tv_id', $selectedTvs)
+            ->delete();
+    
+        foreach ($selectedTvs as $tv_id) {
             $existingSchedule = AdSchedule::where('advertisement_id', $ad->id)
                 ->where('tv_id', $tv_id)
                 ->first();
@@ -79,6 +86,7 @@ class AdController extends Controller
     
         return redirect()->route('ads.index')->with('success', 'Ad and TV assignments updated successfully!');
     }
+    
     
 
     public function edit(Advertisement $ad)
