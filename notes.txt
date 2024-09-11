@@ -1,0 +1,13 @@
+1. schedules() as a hasMany Relationship
+In the Tv model and Advertisement model, the schedules() method defines a one-to-many relationship. This means that one TV (or advertisement) can have multiple schedules:
+
+For Tv: A TV can have multiple ad schedules because it can display many different ads.
+For Advertisement: An advertisement can have multiple schedules because it can be scheduled to run on different TVs at different times.
+The hasMany relationship is important for directly accessing all schedules related to a specific TV or advertisement. For example:
+
+If you want to retrieve all schedules for a TV or an advertisement, you would use this relationship.
+
+
+
+
+/******  one to many relation is to get a specific tv with all ads related to it   ***********/
