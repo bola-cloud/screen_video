@@ -9,9 +9,18 @@ use Illuminate\Http\Request;
 class TvController extends Controller
 {
     // Display the list of TVs
-    public function index()
+    public function index(Request $request)
     {
-        $tvs = Tv::all();
+        $search = $request->input('search'); // Get the search input from the request
+
+        // Build the query with optional search filtering
+        $tvs = Tv::when($search, function($query, $search) {
+            return $query->where('name', 'like', "%{$search}%")
+                         ->orWhere('location', 'like', "%{$search}%");
+        })
+        ->orderBy('id', 'asc')
+        ->paginate(10); // Adjust the pagination limit as needed
+
         return view('admin.tvs.index', compact('tvs'));
     }
 
@@ -34,7 +43,7 @@ class TvController extends Controller
         $data['screen_id'] = $maxScreenId ? $maxScreenId + 1 : 1;
 
         Tv::create($data);
-        return redirect()->route('tvs.index')->with('success', 'TV added successfully');
+        return redirect()->route('tvs.index')->with('success', __('messages.tv_added_successfully'));
     }
 
 
@@ -53,7 +62,7 @@ class TvController extends Controller
         ]);
 
         $tv->update($data);
-        return redirect()->route('tvs.index')->with('success', 'TV updated successfully');
+        return redirect()->route('tvs.index')->with('success', __('messages.tv_updated_successfully'));
     }
 
     // Delete a TV from the database
@@ -64,7 +73,7 @@ class TvController extends Controller
         // Reorder the screen_ids after deletion
         $this->reorderScreenIds();
     
-        return redirect()->route('tvs.index')->with('success', 'TV deleted successfully');
+        return redirect()->route('tvs.index')->with('success', __('messages.tv_deleted_successfully'));
     }
     
     // Function to reorder screen_ids after a deletion
@@ -81,15 +90,12 @@ class TvController extends Controller
     
     public function activateTv(Request $request, $id)
     {
-        // Deactivate all other TVs
-        Tv::where('is_active', 1)->update(['is_active' => 0]);
-
         // Activate the selected TV
         $tv = Tv::findOrFail($id);
         $tv->is_active = $request->is_active;
         $tv->save();
 
-        return response()->json(['success' => true, 'message' => 'TV activation updated.']);
+        return response()->json(['success' => true, 'message' => __('messages.tv_activation_updated')]);
     }
 
 }

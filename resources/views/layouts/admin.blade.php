@@ -11,86 +11,134 @@
     rel="stylesheet">
     <link href="https://maxcdn.icons8.com/fonts/line-awesome/1.1/css/line-awesome.min.css"
     rel="stylesheet">
+    @if (app()->getLocale() == 'ar')
+        <link rel="stylesheet" type="text/css" href="{{asset("app-assets/css-rtl/core/colors/palette-gradient.css")}}">
+        <link rel="stylesheet" type="text/css" href="{{asset("app-assets/css-rtl/pages/timeline.css")}}">
+        <link rel="stylesheet" type="text/css" href="{{asset("app-assets/css-rtl/pages/dashboard-ecommerce.css")}}">
+        <link rel="stylesheet" type="text/css" href="{{asset("assets/css/style-rtl.css")}}">
+        <link rel="stylesheet" type="text/css" href="{{asset("app-assets/css-rtl/core/menu/menu-types/vertical-content-menu.css")}}">
+        <link rel="stylesheet" type="text/css" href="{{asset("app-assets/css-rtl/core/colors/palette-gradient.css")}}">
+        <link rel="stylesheet" type="text/css" href="{{asset("app-assets/css-rtl/app.css")}}">
+        <link rel="stylesheet" type="text/css" href="{{asset("app-assets/css-rtl/custom-rtl.css")}}">
+        <link rel="stylesheet" type="text/css" href="{{asset("app-assets/css-rtl/vendors.css")}}">
+    @else
+        <link rel="stylesheet" type="text/css" href="{{asset("app-assets/css/core/colors/palette-gradient.css")}}">
+        <link rel="stylesheet" type="text/css" href="{{asset("app-assets/css/pages/timeline.css")}}">
+        <link rel="stylesheet" type="text/css" href="{{asset("app-assets/css/pages/dashboard-ecommerce.css")}}">
+        <link rel="stylesheet" type="text/css" href="{{asset("assets/css/style.css")}}">
+        <link rel="stylesheet" type="text/css" href="{{asset("app-assets/css/core/menu/menu-types/vertical-content-menu.css")}}">
+        <link rel="stylesheet" type="text/css" href="{{asset("app-assets/css/core/colors/palette-gradient.css")}}">
+        <link rel="stylesheet" type="text/css" href="{{asset("app-assets/css/app.css")}}">
+        <link rel="stylesheet" type="text/css" href="{{asset("app-assets/css/custom.css")}}">
+        <link rel="stylesheet" type="text/css" href="{{asset("app-assets/css/vendors.css")}}">
+    @endif
+
     <!-- BEGIN VENDOR CSS-->
-    <link rel="stylesheet" type="text/css" href="{{asset("app-assets/css-rtl/vendors.css")}}">
     <link rel="stylesheet" type="text/css" href="{{asset("app-assets/vendors/css/weather-icons/climacons.min.css")}}">
     <link rel="stylesheet" type="text/css" href="{{asset("app-assets/fonts/meteocons/style.css")}}">
     <link rel="stylesheet" type="text/css" href="{{asset("app-assets/vendors/css/charts/morris.css")}}">
     <link rel="stylesheet" type="text/css" href="{{asset("app-assets/vendors/css/charts/chartist.css")}}">
     <link rel="stylesheet" type="text/css" href="{{asset("app-assets/vendors/css/charts/chartist-plugin-tooltip.css")}}">
+
     <!-- END VENDOR CSS-->
-    <!-- BEGIN MODERN CSS-->
-    <link rel="stylesheet" type="text/css" href="{{asset("app-assets/css-rtl/app.css")}}">
-    <link rel="stylesheet" type="text/css" href="{{asset("app-assets/css-rtl/custom-rtl.css")}}">
     <!-- END MODERN CSS-->
     <!-- BEGIN Page Level CSS-->
-    <link rel="stylesheet" type="text/css" href="{{asset("app-assets/css-rtl/core/menu/menu-types/vertical-content-menu.css")}}">
-    <link rel="stylesheet" type="text/css" href="{{asset("app-assets/css-rtl/core/colors/palette-gradient.css")}}">
     <link rel="stylesheet" type="text/css" href="{{asset("app-assets/fonts/simple-line-icons/style.css")}}">
-    <link rel="stylesheet" type="text/css" href="{{asset("app-assets/css-rtl/core/colors/palette-gradient.css")}}">
-    <link rel="stylesheet" type="text/css" href="{{asset("app-assets/css-rtl/pages/timeline.css")}}">
-    <link rel="stylesheet" type="text/css" href="{{asset("app-assets/css-rtl/pages/dashboard-ecommerce.css")}}">
     <link rel="stylesheet" type="text/css"href="{{asset("assets/css/style-rtl.css")}}">
     <link rel="stylesheet" type="text/css"href="{{asset("assets/css/custom.css")}}">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <link rel= "stylesheet" href= "https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css" >
-  @livewireStyles
+    @stack('css')
+    <!-- Include the timepicker CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.13.18/jquery.timepicker.min.css">
+    <style>
+        .ui-timepicker-wrapper {
+            z-index: 9999 !important; /* Ensure the timepicker is on top */
+        }
+        .form-control {
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        .ui-timepicker-list {
+            font-size: 14px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+    @livewireStyles
+    <style>
+        @media (max-width: 720px) {
+            .card.p-5 {
+                padding: 0px !important;
+            }
+        }
+    </style>
 </head>
 <body class="vertical-layout vertical-content-menu 2-columns menu-expanded fixed-navbar"
     data-open="click" data-menu="vertical-content-menu" data-col="2-columns">
     <!-- fixed-top-->
     <nav class="header-navbar navbar-expand-md navbar navbar-with-menu navbar-without-dd-arrow fixed-top navbar-light navbar-hide-on-scroll navbar-border navbar-shadow navbar-brand-center">
         <div class="navbar-wrapper">
-        <div class="navbar-header">
-            <ul class="nav navbar-nav flex-row">
-            <li class="nav-item mobile-menu d-md-none mr-auto"><a class="nav-link nav-menu-main menu-toggle hidden-xs" href="#"><i class="ft-menu font-large-1"></i></a></li>
-            <li class="nav-item">
-                <a class="navbar-brand" href="#">
-                <h3 class="brand-text"> Screen Video  </h3>
-                </a>
-            </li>
-            <li class="nav-item d-md-none">
-                <a class="nav-link open-navbar-container" data-toggle="collapse" data-target="#navbar-mobile"><i class="la la-ellipsis-v"></i></a>
-            </li>
-            </ul>
-        </div>
-        <div class="navbar-container content">
-            <div class="collapse navbar-collapse" id="navbar-mobile">
-            <ul class="nav navbar-nav mr-auto float-left">
-                <li class="nav-item d-none d-md-block"><a class="nav-link nav-menu-main menu-toggle hidden-xs" href="#"><i class="ft-menu"></i></a></li>
-
-
-            </ul>
-            <ul class="nav navbar-nav float-right">
-                <li class="dropdown dropdown-user nav-item">
-                <a class="dropdown-toggle nav-link dropdown-user-link" href="#" data-toggle="dropdown">
-                    @auth
-                    <span class="mr-1">مرحبا,
-                    <span class="user-name text-bold-700">{{ Auth::user()->name }}</span>
-                    </span>
-                    @endauth
-                    @guest
-                    <span class="mr-1">مرحبا, <span class="user-name text-bold-700">Guest</span></span>
-                    @endguest
-
-                    <span class="avatar avatar-online">
-                    <img src="{{asset("app-assets/images/portrait/small/avatar-s-19.png")}}" alt="avatar"><i></i></span>
-                </a>
-                <div class="dropdown-menu dropdown-menu-right">
-
-                    <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="{{ route("logout") }}"
-                        onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><i class="ft-power"></i> خروج</a>
-
-                    <form id="logout-form" method="POST" action="{{ route('logout') }}">
-                        @csrf
-                    </form>
-                </div>
-                </li>
-            </ul>
+            <div class="navbar-header">
+                <ul class="nav navbar-nav flex-row">
+                    <li class="nav-item mobile-menu d-md-none mr-auto"><a class="nav-link nav-menu-main menu-toggle hidden-xs" href="#"><i class="ft-menu font-large-1"></i></a></li>
+                    <li class="nav-item">
+                        <a class="navbar-brand" href="index.html">
+                          <img class="brand-logo" alt="modern admin logo" src="{{asset('app-assets/images/2d354e8d-2e20-453c-bca4-09e8ed7703d4.jpeg')}}"
+                          style="height: 55px; width: 178px;">
+                          {{-- <h3 class="brand-text">Screen Video </h3> --}}
+                        </a>
+                    </li>
+                    <li class="nav-item d-md-none">
+                        <a class="nav-link open-navbar-container" data-toggle="collapse" data-target="#navbar-mobile"><i class="la la-ellipsis-v"></i></a>
+                    </li>
+                </ul>
             </div>
-        </div>
+            <div class="navbar-container content">
+                <div class="collapse navbar-collapse" id="navbar-mobile">
+                    <ul class="nav navbar-nav mr-auto float-left">
+                        <li class="nav-item d-none d-md-block"><a class="nav-link nav-menu-main menu-toggle hidden-xs" href="#"><i class="ft-menu"></i></a></li>
+                    </ul>
+                    <ul class="nav navbar-nav float-right">
+                        <li class="nav-item">
+                            <a class="nav-link" !data-widget="fullscreen"
+                            href="{{ App::getLocale() == 'ar' ? LaravelLocalization::getLocalizedURL('en') : LaravelLocalization::getLocalizedURL('ar') }}"
+                            role="button">
+                                <span class="text-uppercase badge badge-pill badge-dark">{{ App::getLocale() == 'ar' ? 'en' : 'ar' }}</span>
+                            </a>
+                        </li>
+
+                        <li class="dropdown dropdown-user nav-item">
+                            <a class="dropdown-toggle nav-link dropdown-user-link" href="#" data-toggle="dropdown">
+                                @auth
+                                <span class="mr-1">{{ __('lang.hello') }},
+                                    <span class="user-name text-bold-700">{{ Auth::user()->name }}</span>
+                                </span>
+                                @endauth
+                                @guest
+                                <span class="mr-1">{{ __('lang.hello') }}, <span class="user-name text-bold-700">{{ __('lang.guest') }}</span></span>
+                                @endguest
+                                <span class="avatar avatar-online">
+                                    <img src="{{ asset('app-assets/images/portrait/small/avatar-s-19.png') }}" alt="avatar"><i></i>
+                                </span>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right">
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="{{ route('logout') }}"
+                                onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                    <i class="ft-power"></i> {{ __('lang.logout') }}
+                                </a>
+
+                                <form id="logout-form" method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                </form>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </nav>
     <!-- ////////////////////////////////////////////////////////////////////////////-->
@@ -100,39 +148,82 @@
             <div class="main-menu menu-static menu-light menu-accordion menu-shadow" data-scroll-to-active="true">
                 <div class="main-menu-content">
                     <ul class="navigation navigation-main" id="main-menu-navigation" data-menu="menu-navigation">
-                        <li class="nav-item {{ Route::currentRouteName() == 'dashboard' ? 'active':'' }} ">
-                            <a  href="{{route('dashboard')}}"><i class="la la-share-alt"></i><span class="menu-title" data-i18n="nav.morris_charts.main">Dashboard</span></a>
+                        <li class="nav-item {{ Route::currentRouteName() == 'dashboard' ? 'active' : '' }}">
+                            <a href="{{ route('dashboard') }}">
+                                <i class="la la-share-alt"></i>
+                                <span class="menu-title" data-i18n="nav.morris_charts.main">{{ __('lang.dashboard') }}</span>
+                            </a>
                         </li>
-                        <li class=" nav-item"><a href=""><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">TV administration</span></a>
+                        
+                        <li class="nav-item">
+                            <a href="">
+                                <i class="la la-tv"></i> <!-- Changed icon to represent TVs -->
+                                <span class="menu-title" data-i18n="nav.dash.main">{{ __('lang.tv_administration') }}</span>
+                            </a>
                             <ul class="menu-content">
-                                <li class="{{ Route::currentRouteName() == 'tvs.index' ? 'active':'' }}">
-                                    <a class="menu-item " href="{{route('tvs.index')}}" data-i18n="nav.dash.crypto">index</a>
+                                <li class="{{ Route::currentRouteName() == 'tvs.index' ? 'active' : '' }}">
+                                    <a class="menu-item" href="{{ route('tvs.index') }}" data-i18n="nav.dash.crypto">{{ __('lang.index') }}</a>
                                 </li>
-                                <li class="{{ Route::currentRouteName() == 'tvs.create' ? 'active':'' }}">
-                                    <a class="menu-item" href="{{route('tvs.create')}}" data-i18n="nav.dash.sales">create</a>
+                                <li class="{{ Route::currentRouteName() == 'tvs.create' ? 'active' : '' }}">
+                                    <a class="menu-item" href="{{ route('tvs.create') }}" data-i18n="nav.dash.sales">{{ __('lang.create') }}</a>
                                 </li>
                             </ul>
                         </li>
-                        <li class=" nav-item"><a href=""><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Ads administration</span></a>
+                        
+                        <li class="nav-item">
+                            <a href="">
+                                <i class="la la-bullhorn"></i> <!-- Changed icon to represent ads -->
+                                <span class="menu-title" data-i18n="nav.dash.main">{{ __('lang.ads_administration') }}</span>
+                            </a>
                             <ul class="menu-content">
-                                <li class="{{ Route::currentRouteName() == 'ads.index' ? 'active':'' }}">
-                                    <a class="menu-item " href="{{route('ads.index')}}" data-i18n="nav.dash.crypto">index</a>
+                                <li class="{{ Route::currentRouteName() == 'ads.index' ? 'active' : '' }}">
+                                    <a class="menu-item" href="{{ route('ads.index') }}" data-i18n="nav.dash.crypto">{{ __('lang.index') }}</a>
                                 </li>
-                                <li class="{{ Route::currentRouteName() == 'ads.create' ? 'active':'' }}">
-                                    <a class="menu-item" href="{{route('ads.create')}}" data-i18n="nav.dash.sales">create</a>
+                                <li class="{{ Route::currentRouteName() == 'ads.create' ? 'active' : '' }}">
+                                    <a class="menu-item" href="{{ route('ads.create') }}" data-i18n="nav.dash.sales">{{ __('lang.create') }}</a>
                                 </li>
                             </ul>
                         </li>
-                        <li class=" nav-item"><a href=""><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">TV display time </span></a>
+                        
+                        <li class="nav-item">
+                            <a href="">
+                                <i class="la la-clock"></i> <!-- Changed icon to represent display time -->
+                                <span class="menu-title" data-i18n="nav.dash.main">{{ __('lang.tv_display_time') }}</span>
+                            </a>
                             <ul class="menu-content">
-                                <li class="{{ Route::currentRouteName() == 'tv_display_times.index' ? 'active':'' }}">
-                                    <a class="menu-item " href="{{route('tv_display_times.index')}}" data-i18n="nav.dash.crypto">index</a>
+                                <li class="{{ Route::currentRouteName() == 'tv_display_times.index' ? 'active' : '' }}">
+                                    <a class="menu-item" href="{{ route('tv_display_times.index') }}" data-i18n="nav.dash.crypto">{{ __('lang.index') }}</a>
                                 </li>
-                                <li class="{{ Route::currentRouteName() == 'tv_display_times.create' ? 'active':'' }}">
-                                    <a class="menu-item" href="{{route('tv_display_times.create')}}" data-i18n="nav.dash.sales">create</a>
+                                <li class="{{ Route::currentRouteName() == 'tv_display_times.create' ? 'active' : '' }}">
+                                    <a class="menu-item" href="{{ route('tv_display_times.create') }}" data-i18n="nav.dash.sales">{{ __('lang.create') }}</a>
+                                </li>
+                            </ul>
+                        </li>                    
+                        <li class="nav-item">
+                            <a href="">
+                                <i class="la la-users"></i>
+                                <span class="menu-title" data-i18n="nav.dash.main">{{ __('lang.users') }}</span>
+                            </a>
+                            <ul class="menu-content">
+                                <li class="{{ Route::currentRouteName() == 'users.index' ? 'active' : '' }}">
+                                    <a class="menu-item" href="{{ route('users.index') }}" data-i18n="nav.dash.crypto">{{ __('lang.index') }}</a>
+                                </li>
+                                <li class="{{ Route::currentRouteName() == 'users.create' ? 'active' : '' }}">
+                                    <a class="menu-item" href="{{ route('users.create') }}" data-i18n="nav.dash.sales">{{ __('lang.create') }}</a>
                                 </li>
                             </ul>
                         </li>
+                        <li class="nav-item mb-3">
+                            <a href="">
+                                <i class="la la-users"></i>
+                                <span class="menu-title" data-i18n="nav.dash.main">{{ __('lang.Videos Administration') }}</span>
+                            </a>
+                            <ul class="menu-content">
+                                <li class="{{ Route::currentRouteName() == 'video.index' ? 'active' : '' }}">
+                                    <a class="menu-item" href="{{ route('video.index') }}" data-i18n="nav.dash.crypto">{{ __('lang.Process Video') }}</a>
+                                </li>
+                            </ul>
+                        </li>                       
                     </ul>
                 </div>
             </div>
@@ -142,6 +233,7 @@
             </div>
         </div>
     </div>
+
     <!-- ////////////////////////////////////////////////////////////////////////////-->
     <footer class="footer footer-static footer-light navbar-border">
         <p class="clearfix blue-grey lighten-2 text-sm-center mb-0 px-2">

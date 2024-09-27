@@ -7,7 +7,7 @@
 
     <ul id="sortable-list" class="list-group">
         @foreach ($ads as $ad)
-            <li wire:key="ad-{{ $ad['id'] }}" class="list-group-item">
+            <li wire:key="ad-{{ $ad['id'] }}" class="list-group-item" data-id="{{ $ad['id'] }}">
                 <div style="cursor:move;">
                     Ad: {{ $ad['advertisement_id'] }} (Order: {{ $ad['order'] }})
                 </div>
@@ -22,26 +22,23 @@
 </div>
 
 @push('js')
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.13.0/Sortable.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
 
     <script>
         document.addEventListener('livewire:load', function () {
-            let sortableList = document.getElementById('sortable-list');
-            let updatedOrder = [];
+            $('#sortable-list').sortable({
+                update: function(event, ui) {
+                    var orderedAds = [];
+                    $('#sortable-list li').each(function(index, element) {
+                        orderedAds.push({
+                            id: $(element).data('id'),
+                            order: index + 1 // Update order based on the position in the list
+                        });
+                    });
 
-            // Initialize SortableJS manually
-            new Sortable(sortableList, {
-                animation: 150,
-                handle: 'div',
-                onEnd: function () {
-                    // Capture the new order when sorting is done
-                    updatedOrder = Array.from(sortableList.children).map((el, index) => ({
-                        id: el.getAttribute('wire:key').split('-')[1],
-                        order: index + 1
-                    }));
-
-                    // Assign the updatedOrder to the Livewire property
-                    Livewire.emit('setOrder', updatedOrder);
+                    // Send reordered ads to the Livewire component
+                    @this.set('ads', orderedAds);
                 }
             });
         });

@@ -22,9 +22,7 @@ return new class extends Migration
                 ->onUpdate('CASCADE')->onDelete('CASCADE');
 
             $table->integer('order');
-            $table->date('start_at'); // Stores the start date of the schedule
-            $table->date('end_at'); // Stores the end date of the schedule
-
+            $table->date('date'); // Stores the start date of the schedule
             $table->timestamps();
         });
     }

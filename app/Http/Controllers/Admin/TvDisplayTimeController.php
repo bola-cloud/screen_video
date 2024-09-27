@@ -13,13 +13,49 @@ use Illuminate\Support\Facades\Log;
 
 class TvDisplayTimeController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // Fetch all display times with their associated TVs
-        $displayTimes = TvDisplayTime::with('tv')->get();
-
+        // Fetch the query parameters
+        $tv_name = $request->input('tv_name');
+        $start_date = $request->input('start_date');
+        $end_date = $request->input('end_date');
+        $start_time = $request->input('start_time');
+        $end_time = $request->input('end_time');
+    
+        // Build the query
+        $query = TvDisplayTime::with('tv');
+    
+        // Filter by TV name
+        if ($tv_name) {
+            $query->whereHas('tv', function ($q) use ($tv_name) {
+                $q->where('name', 'like', "%{$tv_name}%");
+            });
+        }
+    
+        // Filter by date range
+        if ($start_date && $end_date) {
+            $query->whereBetween('date', [$start_date, $end_date]);
+        } elseif ($start_date) {
+            $query->where('date', '>=', $start_date);
+        } elseif ($end_date) {
+            $query->where('date', '<=', $end_date);
+        }
+    
+        // Filter by start time
+        if ($start_time) {
+            $query->where('start_time', '>=', $start_time);
+        }
+    
+        // Filter by end time
+        if ($end_time) {
+            $query->where('end_time', '<=', $end_time);
+        }
+    
+        // Get the filtered display times with pagination
+        $displayTimes = $query->orderBy('date', 'desc')->paginate(10);
+    
         return view('admin.tv_display_times.index', compact('displayTimes'));
-    }
+    }    
 
     public function create()
     {
@@ -47,7 +83,7 @@ class TvDisplayTimeController extends Controller
                     ->first();
     
                 if ($existingDisplayTime) {
-                    return redirect()->back()->withErrors(['conflict' => 'TV "' . Tv::find($tv_id)->name . '" already has a display time for this date.'])->withInput();
+                    return redirect()->back()->withErrors(['conflict' => __('lang.tv_conflict', ['name' => Tv::find($tv_id)->name])])->withInput();
                 }
             }
     
@@ -64,10 +100,10 @@ class TvDisplayTimeController extends Controller
                 $this->scheduleAdsForTv($tv_id, $data['date']);
             }
     
-            return redirect()->route('tv_display_times.index')->with('success', 'TV Display Time added and ads scheduled successfully.');
+            return redirect()->route('tv_display_times.index')->with('success', __('lang.tv_display_time_added'));
         } catch (\Exception $e) {
             Log::error("Error in store method for TV Display Time - " . $e->getMessage());
-            return redirect()->back()->withErrors(['error' => 'An error occurred while saving TV Display Time.']);
+            return redirect()->back()->withErrors(['error' => __('lang.error_saving_tv_display_time')]);
         }
     }
     
@@ -78,7 +114,7 @@ class TvDisplayTimeController extends Controller
         $displayTime = TvDisplayTime::findOrFail($id);
         
         // Fetch all TVs for selection
-        $tvs = Tv::where('is_active', 1)->get();
+        $tvs = Tv::where('id', $displayTime->tv_id)->get();
         
         // Fetch all the currently assigned TVs for this display time
         $assignedTvs = TvDisplayTime::where('date', $displayTime->date)
@@ -102,26 +138,22 @@ class TvDisplayTimeController extends Controller
     
             // Get the display time to update
             $displayTime = TvDisplayTime::findOrFail($id);
-    
+            $oldDate = $displayTime->date;
             // Check for conflicts before updating
             foreach ($data['tvs'] as $tv_id) {
                 $existingDisplayTime = TvDisplayTime::where('tv_id', $tv_id)
                     ->where('date', $data['date'])
-                    ->where('id', '!=', $id) // Exclude the current record from the check
+                    ->where('id','!=',$id)
                     ->first();
     
                 if ($existingDisplayTime) {
                     return redirect()->back()->withErrors(['conflict' => 'TV "' . Tv::find($tv_id)->name . '" already has a display time for this date.'])->withInput();
                 }
             }
-    
-            // Delete existing display times for this date, start_time, and end_time
-            TvDisplayTime::where('date', $displayTime->date)
-                ->where('start_time', $displayTime->start_time)
-                ->where('end_time', $displayTime->end_time)
-                ->delete();
-    
-            // Recreate the display time for all selected TVs and schedule the ads
+        
+            $displayTime->delete();
+            $sheadule_id=AdSchedule::where('tv_id',$tv_id)->where('date',$oldDate)->first();
+            AdDisplayTime::where('ad_schedule_id',$sheadule_id->id)->delete();
             foreach ($data['tvs'] as $tv_id) {
                 TvDisplayTime::create([
                     'tv_id' => $tv_id,
@@ -129,9 +161,9 @@ class TvDisplayTimeController extends Controller
                     'start_time' => $data['start_time'],
                     'end_time' => $data['end_time'],
                 ]);
-    
-                // Call the method to schedule ads
+                
                 $this->scheduleAdsForTv($tv_id, $data['date']);
+                // dd("s");
             }
     
             return redirect()->route('tv_display_times.index')->with('success', 'TV Display Time updated and ads scheduled successfully.');
@@ -154,19 +186,16 @@ class TvDisplayTimeController extends Controller
                 Log::error("No operating time found for TV ID: $tv_id on date: $date");
                 return false;
             }
-    
-            // Fetch the ads scheduled for this TV, sorted by the order in the ad_schedules table
+            // Fetch the ads scheduled for this TV on the given date, sorted by order in the ad_schedules table
             $adSchedules = AdSchedule::where('tv_id', $tv_id)
-                                     ->whereDate('start_at', '<=', $date)
-                                     ->whereDate('end_at', '>=', $date)
+                                     ->where('date', $date)
                                      ->orderBy('order', 'asc')
                                      ->get();
-    
             if ($adSchedules->isEmpty()) {
                 Log::error("No ads found for TV ID: $tv_id on date: $date");
                 return false;
             }
-    
+
             // Calculate the total duration of all ads
             $totalAdsDuration = 0;
             foreach ($adSchedules as $adSchedule) {
@@ -175,14 +204,14 @@ class TvDisplayTimeController extends Controller
                     $totalAdsDuration += $this->convertDurationToSeconds($ad->video_duration);
                 }
             }
-    
-            // Start calculating the ad display times
+
+            // Start calculating the ad display times based on the TV's operating time
             $currentTime = strtotime($tvDisplayTime->start_time);
             $endTime = strtotime($tvDisplayTime->end_time);
     
             Log::info("TV ID: $tv_id Operating from: " . date('H:i:s', $currentTime) . " to " . date('H:i:s', $endTime));
-    
-            // Repeat playing ads until TV's operating time is reached
+
+            // Repeat playing ads until the TV's operating time is reached
             while ($currentTime < $endTime) {
                 foreach ($adSchedules as $adSchedule) {
                     try {
@@ -196,7 +225,7 @@ class TvDisplayTimeController extends Controller
                         $videoDurationInSeconds = $this->convertDurationToSeconds($ad->video_duration);
                         Log::info("Ad ID: {$ad->id}, Video Duration in seconds: $videoDurationInSeconds");
     
-                        // Check if the current time + video duration goes beyond TV operating time
+                        // Check if the current time + video duration exceeds the TV's operating time
                         if ($currentTime + $videoDurationInSeconds > $endTime) {
                             // Display part of the ad until the TV closes
                             $remainingTime = $endTime - $currentTime;
@@ -218,8 +247,6 @@ class TvDisplayTimeController extends Controller
                         // Convert the current time back to H:i:s format for full ad display
                         $displayTime = date('H:i:s', $currentTime);
                         Log::info("Storing ad display time: TV ID: $tv_id, Ad Schedule ID: {$adSchedule->id}, Display Time: $displayTime");
-    
-                        // Store the ad display time in the ad_display_times table
                         AdDisplayTime::create([
                             'ad_schedule_id' => $adSchedule->id,
                             'display_date' => $date,
@@ -244,8 +271,7 @@ class TvDisplayTimeController extends Controller
         }
     
         return true;
-    } 
-
+    }    
     /**
      * Helper function to convert H:i:s duration to seconds
      */
@@ -259,6 +285,12 @@ class TvDisplayTimeController extends Controller
     {
         // Find the display time and delete it
         $displayTime = TvDisplayTime::findOrFail($id);
+        $schedules = AdSchedule::where('tv_id',$displayTime->tv_id)
+                                ->where('date',$displayTime->date)
+                                ->with('displayTimes')->get();
+        foreach ($schedules as $schedule) {
+            $schedule->displayTimes()->delete();
+        }       
         $displayTime->delete();
 
         return redirect()->route('tv_display_times.index')->with('success', 'TV Display Time deleted successfully.');

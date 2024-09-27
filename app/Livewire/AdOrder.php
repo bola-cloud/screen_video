@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Livewire;
 
 use Livewire\Component;
@@ -18,10 +17,10 @@ class AdOrder extends Component
         $this->ads = AdSchedule::where('tv_id', $tv_id)->orderBy('order', 'asc')->get()->toArray();
     }
 
-    public function saveOrder($orderedAds)
+    public function saveOrder()
     {
         // Update the order in the database based on the new order
-        foreach ($orderedAds as $ad) {
+        foreach ($this->ads as $ad) {
             AdSchedule::where('id', $ad['id'])->update(['order' => $ad['order']]);
         }
 

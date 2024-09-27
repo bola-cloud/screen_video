@@ -12,11 +12,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // \App\Models\User::factory(10)->create();
-
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
+        // Call both the TvsSeeder and AdminUserSeeder
+        $this->call([
+            TvsSeeder::class, // Calls the TV seed data
+            AdminUserSeeder::class, // Calls the Admin User seed data
+        ]);
     }
 }

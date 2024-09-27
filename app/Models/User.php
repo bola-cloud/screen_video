@@ -27,6 +27,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'category',
+        'company',
+        'phone',
     ];
 
     /**
@@ -41,6 +44,10 @@ class User extends Authenticatable
         'two_factor_secret',
     ];
 
+    public function ads()
+    {
+        return $this->hasMany(Advertisement::class, 'client_id');
+    }
     /**
      * The attributes that should be cast.
      *

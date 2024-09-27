@@ -12,8 +12,7 @@ class AdSchedule extends Model
         'advertisement_id',
         'tv_id',
         'order',
-        'start_at',
-        'end_at',
+        'date',
     ];
 
     // Relationships
