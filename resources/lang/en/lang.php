@@ -201,4 +201,8 @@ return [
     'search_by_tv_name' => 'Search by TV Name',
     'start_date' => 'Start Date',
     'end_date' => 'End Date',
+    'hours' => 'hours',
+    'minutes' => 'minutes',
+    'seconds' => 'seconds',
+
 ];

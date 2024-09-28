@@ -50,6 +50,9 @@ Route::group([
     //videos
     Route::get('/video', [\App\Http\Controllers\Admin\VideoController::class, 'showForm'])->name('video.index');
     Route::post('/video/process', [\App\Http\Controllers\Admin\VideoController::class, 'processUpload'])->name('processUpload');
+    Route::get('/video/progress/{key}', [\App\Http\Controllers\Admin\VideoController::class, 'getProgress']);
+    Route::get('/video/download/{filename}', [\App\Http\Controllers\Admin\VideoController::class, 'downloadVideo'])->name('downloadVideo');
+
 });
 
 // Language switch route

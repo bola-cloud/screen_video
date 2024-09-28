@@ -15,6 +15,7 @@
         "mcamara/laravel-localization": "^2.0",
         "pbmedia/laravel-ffmpeg": "^8.5",
         "php-ffmpeg/php-ffmpeg": "^1.2",
+        "predis/predis": "^2.2",
         "symfony/process": "^6.4"
     },
     "require-dev": {

@@ -17,7 +17,7 @@
 
                 <h1>{{ __('lang.upload_video_create') }}</h1>
 
-                <form id="durationForm" action="{{ route('processUpload') }}" method="POST" enctype="multipart/form-data">
+                <form action="{{ route('processUpload') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="form-group">
                         <label for="process_type">{{ __('lang.select_process_type') }}</label>
@@ -39,26 +39,33 @@
                             <input type="file" name="music" class="form-control">
                         </div>
 
+                        <!-- Select dropdowns for hours, minutes, and seconds -->
                         <div class="form-group">
-                            <label for="duration_photo_music">{{ __('lang.specify_duration') }}</label>
+                            <label>{{ __('lang.specify_duration') }}</label>
                             <div class="row">
                                 <div class="col-md-4">
-                                    <select id="hours_photo_music" class="form-control">
-                                        <!-- Options will be populated by JS -->
+                                    <label for="hours">{{ __('lang.hours') }}</label>
+                                    <select name="hours" id="hours" class="form-control">
+                                        @for ($i = 0; $i <= 23; $i++)
+                                            <option value="{{ $i }}">{{ $i }}</option>
+                                        @endfor
                                     </select>
-                                    <small>{{ __('Hours') }}</small>
                                 </div>
                                 <div class="col-md-4">
-                                    <select id="minutes_photo_music" class="form-control">
-                                        <!-- Options will be populated by JS -->
+                                    <label for="minutes">{{ __('lang.minutes') }}</label>
+                                    <select name="minutes" id="minutes" class="form-control">
+                                        @for ($i = 0; $i <= 59; $i++)
+                                            <option value="{{ $i }}">{{ $i }}</option>
+                                        @endfor
                                     </select>
-                                    <small>{{ __('Minutes') }}</small>
                                 </div>
                                 <div class="col-md-4">
-                                    <select id="seconds_photo_music" class="form-control">
-                                        <!-- Options will be populated by JS -->
+                                    <label for="seconds">{{ __('lang.seconds') }}</label>
+                                    <select name="seconds" id="seconds" class="form-control">
+                                        @for ($i = 0; $i <= 59; $i++)
+                                            <option value="{{ $i }}">{{ $i }}</option>
+                                        @endfor
                                     </select>
-                                    <small>{{ __('Seconds') }}</small>
                                 </div>
                             </div>
                         </div>
@@ -71,33 +78,37 @@
                             <input type="file" name="video" class="form-control">
                         </div>
 
+                        <!-- Select dropdowns for hours, minutes, and seconds -->
                         <div class="form-group">
-                            <label for="duration_repeat_video">{{ __('lang.specify_duration') }}</label>
+                            <label>{{ __('lang.specify_duration') }}</label>
                             <div class="row">
                                 <div class="col-md-4">
-                                    <select id="hours_repeat_video" class="form-control">
-                                        <!-- Options will be populated by JS -->
+                                    <label for="hours_repeat">{{ __('lang.hours') }}</label>
+                                    <select name="hours_repeat" id="hours_repeat" class="form-control">
+                                        @for ($i = 0; $i <= 23; $i++)
+                                            <option value="{{ $i }}">{{ $i }}</option>
+                                        @endfor
                                     </select>
-                                    <small>{{ __('Hours') }}</small>
                                 </div>
                                 <div class="col-md-4">
-                                    <select id="minutes_repeat_video" class="form-control">
-                                        <!-- Options will be populated by JS -->
+                                    <label for="minutes_repeat">{{ __('lang.minutes') }}</label>
+                                    <select name="minutes_repeat" id="minutes_repeat" class="form-control">
+                                        @for ($i = 0; $i <= 59; $i++)
+                                            <option value="{{ $i }}">{{ $i }}</option>
+                                        @endfor
                                     </select>
-                                    <small>{{ __('Minutes') }}</small>
                                 </div>
                                 <div class="col-md-4">
-                                    <select id="seconds_repeat_video" class="form-control">
-                                        <!-- Options will be populated by JS -->
+                                    <label for="seconds_repeat">{{ __('lang.seconds') }}</label>
+                                    <select name="seconds_repeat" id="seconds_repeat" class="form-control">
+                                        @for ($i = 0; $i <= 59; $i++)
+                                            <option value="{{ $i }}">{{ $i }}</option>
+                                        @endfor
                                     </select>
-                                    <small>{{ __('Seconds') }}</small>
                                 </div>
                             </div>
                         </div>
                     </div>
-
-                    <!-- This will be the field named 'duration' that gets submitted -->
-                    <input type="hidden" name="duration" id="duration">
 
                     <button type="submit" class="btn btn-primary">{{ __('lang.process_video') }}</button>
                 </form>
@@ -109,57 +120,21 @@
 
 @push('js')
 <script>
-    // Populate the time options dynamically for hours, minutes, and seconds
-    function populateTimeOptions(id, max) {
-        for (var i = 0; i <= max; i++) {
-            var value = i < 10 ? '0' + i : i;
-            $(id).append('<option value="'+ value +'">'+ value +'</option>');
+    document.getElementById('process_type').addEventListener('change', function () {
+        var processType = this.value;
+        var photoMusicInputs = document.getElementById('photoMusicInputs');
+        var repeatVideoInputs = document.getElementById('repeatVideoInputs');
+
+        if (processType === 'photo_music') {
+            photoMusicInputs.style.display = 'block';
+            repeatVideoInputs.style.display = 'none';
+        } else if (processType === 'repeat_video') {
+            photoMusicInputs.style.display = 'none';
+            repeatVideoInputs.style.display = 'block';
         }
-    }
-
-    $(document).ready(function() {
-        // Populate hours (0-23), minutes and seconds (0-59) for both sections
-        populateTimeOptions('#hours_photo_music, #hours_repeat_video', 23);  // Hours
-        populateTimeOptions('#minutes_photo_music, #minutes_repeat_video', 59);  // Minutes
-        populateTimeOptions('#seconds_photo_music, #seconds_repeat_video', 59);  // Seconds
-
-        // Switch between photo/music inputs and repeat video inputs
-        $('#process_type').change(function () {
-            var processType = $(this).val();
-            if (processType === 'photo_music') {
-                $('#photoMusicInputs').show();
-                $('#repeatVideoInputs').hide();
-            } else if (processType === 'repeat_video') {
-                $('#photoMusicInputs').hide();
-                $('#repeatVideoInputs').show();
-            }
-        }).trigger('change'); // Trigger the change event on page load
-
-        // Format the duration in hh:mm:ss and store it in the 'duration' input before form submission
-        $('#durationForm').submit(function (event) {
-            var processType = $('#process_type').val();
-
-            var hours, minutes, seconds;
-
-            if (processType === 'photo_music') {
-                hours = $('#hours_photo_music').val();
-                minutes = $('#minutes_photo_music').val();
-                seconds = $('#seconds_photo_music').val();
-            } else if (processType === 'repeat_video') {
-                hours = $('#hours_repeat_video').val();
-                minutes = $('#minutes_repeat_video').val();
-                seconds = $('#seconds_repeat_video').val();
-            }
-
-            // Combine hours, minutes, and seconds into hh:mm:ss format
-            var formattedDuration = hours + ':' + minutes + ':' + seconds;
-
-            // Set the hidden input value to the formatted duration
-            $('#duration').val(formattedDuration);
-
-            // Optionally, log the result (for debugging)
-            console.log('Formatted Duration: ' + formattedDuration);
-        });
     });
-</script>
+
+    // Trigger change event on page load to show/hide appropriate fields
+    document.getElementById('process_type').dispatchEvent(new Event('change'));
+</script>    
 @endpush
