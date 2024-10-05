@@ -21,6 +21,12 @@
         <link rel="stylesheet" type="text/css" href="{{asset("app-assets/css-rtl/app.css")}}">
         <link rel="stylesheet" type="text/css" href="{{asset("app-assets/css-rtl/custom-rtl.css")}}">
         <link rel="stylesheet" type="text/css" href="{{asset("app-assets/css-rtl/vendors.css")}}">
+        <style>
+            button.btn-close {
+                margin-right: auto !important;
+                margin-left: unset !important;
+            }
+        </style>
     @else
         <link rel="stylesheet" type="text/css" href="{{asset("app-assets/css/core/colors/palette-gradient.css")}}">
         <link rel="stylesheet" type="text/css" href="{{asset("app-assets/css/pages/timeline.css")}}">
@@ -50,24 +56,7 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <link rel= "stylesheet" href= "https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css" >
     @stack('css')
-    <!-- Include the timepicker CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.13.18/jquery.timepicker.min.css">
-    <style>
-        .ui-timepicker-wrapper {
-            z-index: 9999 !important; /* Ensure the timepicker is on top */
-        }
-        .form-control {
-            padding: 10px;
-            border-radius: 4px;
-            border: 1px solid #ccc;
-        }
-        .ui-timepicker-list {
-            font-size: 14px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-    </style>
-    @livewireStyles
+  	@livewireStyles
     <style>
         @media (max-width: 720px) {
             .card.p-5 {
@@ -79,13 +68,14 @@
 <body class="vertical-layout vertical-content-menu 2-columns menu-expanded fixed-navbar"
     data-open="click" data-menu="vertical-content-menu" data-col="2-columns">
     <!-- fixed-top-->
+        <!-- fixed-top-->
     <nav class="header-navbar navbar-expand-md navbar navbar-with-menu navbar-without-dd-arrow fixed-top navbar-light navbar-hide-on-scroll navbar-border navbar-shadow navbar-brand-center">
         <div class="navbar-wrapper">
             <div class="navbar-header">
                 <ul class="nav navbar-nav flex-row">
                     <li class="nav-item mobile-menu d-md-none mr-auto"><a class="nav-link nav-menu-main menu-toggle hidden-xs" href="#"><i class="ft-menu font-large-1"></i></a></li>
                     <li class="nav-item">
-                        <a class="navbar-brand" href="index.html">
+                        <a class="navbar-brand" href="{{route('dashboard')}}">
                           <img class="brand-logo" alt="modern admin logo" src="{{asset('app-assets/images/2d354e8d-2e20-453c-bca4-09e8ed7703d4.jpeg')}}"
                           style="height: 55px; width: 178px;">
                           {{-- <h3 class="brand-text">Screen Video </h3> --}}
@@ -148,10 +138,25 @@
             <div class="main-menu menu-static menu-light menu-accordion menu-shadow" data-scroll-to-active="true">
                 <div class="main-menu-content">
                     <ul class="navigation navigation-main" id="main-menu-navigation" data-menu="menu-navigation">
+
                         <li class="nav-item {{ Route::currentRouteName() == 'dashboard' ? 'active' : '' }}">
                             <a href="{{ route('dashboard') }}">
                                 <i class="la la-share-alt"></i>
                                 <span class="menu-title" data-i18n="nav.morris_charts.main">{{ __('lang.dashboard') }}</span>
+                            </a>
+                        </li>
+
+                        <li class="nav-item {{ Route::currentRouteName() == 'client.reports' ? 'active' : '' }}">
+                            <a href="{{ route('client.reports') }}">
+                                <i class="la la-share-alt"></i>
+                                <span class="menu-title" data-i18n="nav.morris_charts.main">{{ __('lang.client_report') }}</span>
+                            </a>
+                        </li>
+
+                        <li class="nav-item {{ Route::is('institutions.*') ? 'active' : '' }}">
+                            <a href="{{ route('institutions.index') }}">
+                                <i class="la la-hospital"></i> <!-- Change this icon as per your preference -->
+                                <span class="menu-title" data-i18n="nav.institutions.main">{{ __('lang.institutions') }}</span>
                             </a>
                         </li>
                         
@@ -223,7 +228,7 @@
                                     <a class="menu-item" href="{{ route('video.index') }}" data-i18n="nav.dash.crypto">{{ __('lang.Process Video') }}</a>
                                 </li>
                             </ul>
-                        </li>                       
+                        </li> 
                     </ul>
                 </div>
             </div>
@@ -233,7 +238,6 @@
             </div>
         </div>
     </div>
-
     <!-- ////////////////////////////////////////////////////////////////////////////-->
     <footer class="footer footer-static footer-light navbar-border">
         <p class="clearfix blue-grey lighten-2 text-sm-center mb-0 px-2">

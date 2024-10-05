@@ -5,61 +5,42 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\AdSchedule;
 use App\Models\Advertisement;
+use App\Models\TvDisplayTime;
+use App\Models\AdDisplayTime;
 use Illuminate\Http\Request;
-use Symfony\Component\Process\Process;
-use Symfony\Component\Process\Exception\ProcessFailedException;
+use PhpMqtt\Client\Facades\MQTT;
+use Carbon\Carbon;
 
 class AdController extends Controller
 {
-  
-public function publishNextAd($tv_id)
+public function publishNextAd($tv_id,$order)
 {
-    try {
-        // Get the next ad for the TV
-        $adSchedule = AdSchedule::where('tv_id', $tv_id)
-                                ->orderBy('order')
-                                ->first();
+$currentDate = Carbon::now()->format('Y-m-d');
 
-        if (!$adSchedule) {
-            // If no unplayed ad, reset the played status to restart the cycle
-            $adSchedule = AdSchedule::where('tv_id', $tv_id)->orderBy('order')->first();
-        }
-
+    $time_tvs = TvDisplayTime::where('tv_id', $tv_id)->where('date', $currentDate)->first();
+try {
+$last_order = AdSchedule::where('tv_id', $tv_id)
+              ->where('date', $currentDate)
+              ->orderBy('order', 'desc')
+              ->first(); 
+$adSchedule = AdSchedule::where('tv_id', $tv_id)
+              	->where('order', $order)
+  				->where('date',$currentDate)
+              ->first();
         $ad = Advertisement::find($adSchedule->advertisement_id);
-
-        // Prepare data to publish
-        $data = json_encode([
-            'advertisement_id' => $ad->id,
-            'video_link' => $ad->video_link,
-            'tv_id' => $tv_id // Make sure the tv_id is included for the topic
-        ]);
-
-        // Use Process to execute Node.js script
-        $process = new Process(['C:\\Program Files\\nodejs\\node', base_path('node_scripts/mqtt_publisher.js'), $data]);
-        $process->run();
-        
-
-        // Check if the process was successful
-        if (!$process->isSuccessful()) {
-            \Log::error('Node.js Script Error: ' . $process->getErrorOutput());
-            throw new ProcessFailedException($process);
-        }
-
-        // Log the output for debugging
-        \Log::info('Node.js Script Output: ' . $process->getOutput());
-
-        return response()->json(['message' => 'Ad published successfully', 'output' => $process->getOutput(), 'ad' => $ad]);
-
+        $server   = '77.37.54.128';
+        $port     = 1883;
+        $clientId = 'ad-publisher';
+        $mqtt     = new \PhpMqtt\Client\MqttClient($server, $port, $clientId);
+        // Conect, publish, and disconnect
+        $mqtt->connect();
+   
+$mqtt->publish("video/{$tv_id}", "{$ad->video_link},{$adSchedule->order},{$last_order->order},{$time_tvs->end_time}", 0);
+        return response()->json(['message' => 'Ad published successfully', 'order'=>$adSchedule->order,'ad_id'=>$adSchedule->advertisement_id ]);
     } catch (\Exception $e) {
         return response()->json(['error' => 'Error publishing ad: ' . $e->getMessage()], 500);
     }
 }
 
-    /**
-     * Endpoint to trigger the ad scheduling.
-     */
-    public function triggerAdScheduling($tv_id)
-    {
-        return $this->publishNextAd($tv_id);
-    }
+
 }

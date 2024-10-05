@@ -4,7 +4,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AdController;
 use App\Http\Controllers\Api\TriggerVideo;
-
+use App\Http\Controllers\Api\ClientController;
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\TvController;
+ 
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -15,18 +18,24 @@ use App\Http\Controllers\Api\TriggerVideo;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
+Route::get('/tvs/{tv_id}/{order}', [AdController::class, 'publishNextAd']);
+Route::get('/trigger-video/{tv_id}/{order}', [TriggerVideo::class, 'triggerVideo']);
+Route::get('/get_client/ads', [ClientController::class, 'getClientAds']);
+Route::get('/fetch-ads/{tv_id}/{advertisement_id}/{date}', [AdController::class, 'getAds']);
 
-// Public routes
+
+Route::get('/screenstv', [TvController::class, 'index']);
+Route::get('/time_tv/{tv_id}', [TvController::class, 'tvs_time']);
+Route::get('/end_time_tv/{tv_id}', [TvController::class, 'tv_end_time']);
+
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::get('/ads/client/{client_id}', [ClientController::class, 'getAdsByClient']);
 
-// Sanctum protected routes
+Route::get('/tvs/{ad_id}', [ClientController::class, 'getTvsByAd']);
+Route::get('/fetch-ads/{tv_id}/{advertisement_id}/{date}', [ClientController::class, 'getAds']);
+
+// Protected route (requires authentication via Sanctum)
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/tvs/{tv_id}/publish-next-ad', [AdController::class, 'triggerAdScheduling']);
-    Route::post('/trigger-video', [TriggerVideo::class, 'triggerVideo']);
     Route::post('/logout', [AuthController::class, 'logout']);
-
-    Route::get('/user', function (Request $request) {
-        return $request->user();
-    });
 });

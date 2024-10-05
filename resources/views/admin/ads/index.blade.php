@@ -35,7 +35,7 @@
                                 <th>{{ __('lang.brand') }}</th>
                                 <th>{{ __('lang.video_link') }}</th>
                                 <th>{{ __('lang.video_duration') }}</th>
-                                <th>{{ __('lang.is_active') }}</th>
+                                {{-- <th>{{ __('lang.is_active') }}</th> --}}
                                 <th>{{ __('lang.actions') }}</th>
                             </tr>
                         </thead>
@@ -47,9 +47,9 @@
                                     <td>{{ $ad->brand }}</td>
                                     <td>{{ $ad->video_link }}</td>
                                     <td>{{ $ad->video_duration }}</td>
-                                    <td>
+                                    {{-- <td>
                                         <input type="checkbox" role="switch" class="is_active_switch" data-id="{{ $ad->id }}" {{ $ad->is_active ? 'checked' : '' }}>
-                                    </td>
+                                    </td> --}}
                                     <td class="d-flex">
                                         <a href="{{ route('ads.edit', $ad->id) }}" class="btn btn-warning mr-2 ml-2">{{ __('lang.edit') }}</a>
                                         {{--<a href="{{ route('ads.chooseTvs', $ad->id) }}" class="btn btn-info">{{ __('lang.assign_tvs') }}</a>--}}

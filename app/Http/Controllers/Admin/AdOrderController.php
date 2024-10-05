@@ -20,10 +20,11 @@ class AdOrderController extends Controller
             $ads = AdSchedule::where('tv_id', $tv_id)
                 ->where('date', $date) // Filter by selected date
                 ->orderBy('order', 'asc')
-                ->with('advertisement')
+              	->with('advertisement')	
                 ->get()
                 ->toArray();
         }
+
         return view('admin.tvs.ad-order', compact('ads', 'tv_id'));
     }
 

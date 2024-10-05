@@ -23,6 +23,7 @@ return new class extends Migration
 
             $table->integer('order');
             $table->date('date'); // Stores the start date of the schedule
+            $table->integer('turns')->default(1); // Add the turns column with a default value of 1
             $table->timestamps();
         });
     }

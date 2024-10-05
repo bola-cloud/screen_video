@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container-fluid">
-    <h2>{{ __('lang.reorder_ads_for_tv', ['tv_id' => $tv_id]) }}</h2>
+    <h2>Reorder Ads for TV #{{ $tv_id }}</h2>
 
     @if (session()->has('message'))
         <div class="alert alert-success">{{ session('message') }}</div>
@@ -12,11 +12,11 @@
     <form id="date-search-form" action="{{ route('tv.ad-order', $tv_id) }}" method="GET">
         <div class="row mb-4">
             <div class="col-md-4">
-                <label for="date" class="form-label">{{ __('lang.select_date') }}</label>
+                <label for="date" class="form-label">Select Date:</label>
                 <input type="date" id="date" name="date" class="form-control" value="{{ request('date') }}">
             </div>
             <div class="col-md-4">
-                <button type="submit" class="btn btn-primary mt-4">{{ __('lang.search') }}</button>
+                <button type="submit" class="btn btn-primary mt-4">Search</button>
             </div>
         </div>
     </form>
@@ -27,7 +27,7 @@
             @foreach ($ads as $ad)
                 <li class="list-group-item" data-id="{{ $ad['id'] }}">
                     <div style="cursor:move;">
-                        {{ __('lang.ad_title_with_order', ['title' => $ad['advertisement']['title'], 'order' => $ad['order']]) }}
+                        Ad: {{ $ad['advertisement']['title'] }} (Order: {{ $ad['order'] }})
                     </div>
                 </li>
             @endforeach
@@ -35,10 +35,10 @@
 
         <!-- Button to save the new order -->
         <button id="confirm-order-btn" class="btn btn-success mt-3">
-            {{ __('lang.save_order') }}
+            Save Order
         </button>
     @else
-        <p>{{ __('lang.no_ads_available') }}</p>
+        <p>No ads available for the selected date.</p>
     @endif
 </div>
 @endsection
@@ -69,7 +69,7 @@
                     data: {
                         order: orderedAds,
                         date: '{{ request('date') }}', // Include the selected date
-                  		tv_id: {{ $tv_id }}, // Include the TV ID
+                  		tv_id: {{ $tv_id }}, // Include the selected date
                         _token: '{{ csrf_token() }}'
                     },
                     success: function(response) {

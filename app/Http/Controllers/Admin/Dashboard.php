@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-
 use App\Models\Tv;
 use App\Models\Advertisement;
 use Illuminate\Http\Request;
@@ -12,30 +11,28 @@ class Dashboard extends Controller
 {
     public function index(Request $request)
     {
+        // Fetch all ads for the select2 dropdown
+        $ads = Advertisement::all();
+
+        // Variables for statistics
         $tvsCount = Tv::count();
         $adsCount = Advertisement::count();
 
-        $ads = Advertisement::query();
+        // Fetch the selected ad
+        $selectedAd = null;
+        $selectedTvs = collect();
+        if ($request->has('ad')) {
+            $selectedAd = Advertisement::with('schedules.tv', 'schedules.displayTimes')
+                ->findOrFail($request->input('ad'));
 
-        // Check if date filters are provided
-        $startDate = $request->input('start_date');
-        $endDate = $request->input('end_date');
-
-        // Filter by date range if provided
-        if ($startDate && $endDate) {
-            $ads->whereHas('schedules', function ($query) use ($startDate, $endDate) {
-                $query->whereBetween('date', [$startDate, $endDate]);
-            });
+            // Fetch only the TVs that will display this ad
+            $selectedTvs = Tv::whereHas('schedules', function ($query) use ($selectedAd) {
+                $query->where('advertisement_id', $selectedAd->id);
+            })->with(['schedules' => function ($query) use ($selectedAd) {
+                $query->where('advertisement_id', $selectedAd->id)->with('displayTimes');
+            }])->get();
         }
 
-        // Fetch the ads and their schedules within the date range
-        $filteredAds = $ads->with(['schedules' => function ($query) use ($startDate, $endDate) {
-            if ($startDate && $endDate) {
-                $query->whereBetween('date', [$startDate, $endDate]);
-            }
-        }])->get();
-
-        return view('admin.dashboard', compact('tvsCount', 'adsCount', 'filteredAds'));
+        return view('admin.dashboard', compact('ads', 'tvsCount', 'adsCount', 'selectedAd', 'selectedTvs'));
     }
-
 }

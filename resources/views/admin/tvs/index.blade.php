@@ -14,13 +14,27 @@
                     <div class="alert alert-success">{{ __('lang.success_message') }}</div>
                 @endif
 
-                <!-- Search Form -->
-                <form action="{{ route('tvs.index') }}" method="GET" class="mb-4">
-                    <div class="form-group">
-                        <input type="text" name="search" class="form-control" value="{{ request()->get('search') }}" placeholder="{{ __('lang.search') }}">
+                <!-- Search Form with Institution Filter -->
+                <form id="filterForm" method="GET" class="mb-4 d-flex mt-4 row">
+                    <div class="form-group me-2 col-md-4">
+                        <input type="text" name="search" id="search" class="form-control" value="{{ request()->get('search') }}" placeholder="{{ __('lang.search') }}">
                     </div>
-                    <button type="submit" class="btn btn-secondary">{{ __('lang.search') }}</button>
+
+                    <div class="form-group me-2 col-md-4">
+                        <select name="institution_id" id="institution_id" class="form-control">
+                            <option value="">{{ __('lang.all_institutions') }}</option>
+                            @foreach($institutions as $institution)
+                                <option value="{{ $institution->id }}" {{ request()->get('institution_id') == $institution->id ? 'selected' : '' }}>
+                                    {{ $institution->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-secondary">{{ __('lang.search') }}</button>
+                    </div>
                 </form>
+
 
                 <div class="table-responsive">
                     <table class="table">
@@ -29,16 +43,18 @@
                                 <th>{{ __('lang.id') }}</th>
                                 <th>{{ __('lang.name') }}</th>
                                 <th>{{ __('lang.location') }}</th>
+                                <th>{{ __('lang.institution') }}</th>
                                 <th>{{ __('lang.is_active') }}</th>
                                 <th>{{ __('lang.actions') }}</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="tvTableBody">
                             @foreach ($tvs as $tv)
                                 <tr>
                                     <td>{{ $tv->id }}</td>
                                     <td>{{ $tv->name }}</td>
                                     <td>{{ $tv->location }}</td>
+                                    <td>{{ $tv->institution->name ?? 'N/A' }}</td>
                                     <td>
                                         <input type="checkbox" class="is_active_switch" data-id="{{ $tv->id }}" {{ $tv->is_active ? 'checked' : '' }}>
                                     </td>
@@ -57,49 +73,24 @@
                     </table>
                 </div>
 
-                <!-- Pagination links (if using pagination) -->
-                {{ $tvs->appends(['search' => request()->get('search')])->links() }}
+                <!-- Pagination links -->
+                <div id="paginationLinks">
+                    {{ $tvs->appends(['search' => request()->get('search'), 'institution_id' => request()->get('institution_id')])->links() }}
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<script>
-    document.querySelectorAll('.is_active_switch').forEach(item => {
-        item.addEventListener('change', function() {
-            const tvId = this.getAttribute('data-id');
-            const isActive = this.checked ? 1 : 0;
-
-            fetch(`/tvs/activate/${tvId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify({ is_active: isActive })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('{{ __('lang.activation_status_success') }}');
-                } else {
-                    alert('{{ __('lang.activation_status_failure') }}');
-                }
-            });
-        });
-    });
-</script>
 
 @endsection
+
 @push('css')
    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+@endpush
 
-    <!-- Optional JavaScript and Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
-    <style>
-        a{
-            text-decoration: none !important;
-        }
-    </style>
+@push('js')
+   <!-- Bootstrap JS -->
+   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
 @endpush

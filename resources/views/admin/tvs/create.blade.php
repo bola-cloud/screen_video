@@ -21,6 +21,16 @@
                             <label for="location">{{ __('lang.location') }}</label>
                             <input type="text" name="location" class="form-control" value="{{ old('location') }}" required>
                         </div>
+                        <!-- Institution Select -->
+                        <div class="form-group">
+                            <label for="institution_id">{{ __('lang.select_institution') }}</label>
+                            <select name="institution_id" class="form-control" required>
+                                <option value="">{{ __('lang.choose_institution') }}</option>
+                                @foreach($institutions as $institution)
+                                    <option value="{{ $institution->id }}">{{ $institution->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                         <button type="submit" class="btn btn-success">{{ __('lang.add_tv') }}</button>
                     </form>
                 </div>

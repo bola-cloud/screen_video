@@ -13,6 +13,7 @@ class Tv extends Model
         'screen_id',
         'location',
         'is_active',
+        'institution_id',
     ];
 
     // Relationships
@@ -33,6 +34,11 @@ class Tv extends Model
     public function displayTimes()
     {
         return $this->hasMany(TvDisplayTime::class);
+    }
+
+    public function institution()
+    {
+        return $this->belongsTo(Institution::class,'institution_id');
     }
 
     /**

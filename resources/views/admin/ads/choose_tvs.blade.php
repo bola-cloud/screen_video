@@ -10,31 +10,48 @@
                     <a href="{{ route('ads.index') }}" class="btn btn-primary">{{ __('lang.back_to_list') }}</a>
                 </div>
 
-                <div class="card-body">
-                    <!-- Search Input -->
-                    <div class="form-group">
-                        <input type="text" id="search-tvs" class="form-control" placeholder="{{ __('lang.search_tvs') }}">
-                    </div>
+                <div class="card-body mt-4">
+                    <!-- Search Input for TVs -->
+                    <input type="text" id="search-tvs" class="form-control mb-3" placeholder="Search TVs...">
 
-                    <!-- Select All / Deselect All Button -->
-                    <button type="button" id="select-all-btn" class="btn btn-secondary mb-3">{{ __('lang.select_all') }}</button>
-
-                    <!-- Form to assign TVs -->
                     <form action="{{ route('ads.storeTvs', $ad->id) }}" method="POST">
                         @csrf
 
-                        <!-- TV Grid Display -->
-                        <div class="row" id="tv-list">
-                            @foreach ($tvs as $tv)
-                                <div class="col-md-2 tv-item" data-name="{{ $tv->name }}" data-location="{{ $tv->location }}">
-                                    <div class="tv-screen">
-                                        <div class="tv-name">{{ $tv->name }}</div>
-                                        <div class="checkbox-wrapper">
-                                            <input type="checkbox" id="tv-{{ $tv->id }}" name="tvs[]" value="{{ $tv->id }}">
-                                            <label for="tv-{{ $tv->id }}"></label>
-                                        </div>
+                        <!-- Tabs for Institutions -->
+                        <ul class="nav nav-tabs mt-5" id="institutionTabs" role="tablist">
+                            @foreach ($institutions as $institution)
+                                <li class="nav-item">
+                                    <a class="nav-link {{ $loop->first ? 'active' : '' }}" id="tab-{{ $institution->id }}" data-bs-toggle="tab" href="#institution-{{ $institution->id }}" role="tab">{{ $institution->name }}</a>
+                                </li>
+                            @endforeach
+                        </ul>
+
+                        <div class="tab-content mt-3" id="institutionTabContent">
+                            @foreach ($institutions as $institution)
+                                <div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}" id="institution-{{ $institution->id }}" role="tabpanel">
+                                    
+                                    <!-- Select All / Deselect All Button for each tab -->
+                                    <button type="button" class="select-all-btn btn btn-secondary mb-3" data-institution-id="{{ $institution->id }}">{{ __('lang.select_all') }}</button>
+
+                                    <!-- TV Grid Display for this Institution -->
+                                    <div class="row" id="tv-list-{{ $institution->id }}">
+                                        @foreach ($institution->tvs as $tv)
+                                            <div class="col-md-2 tv-item" data-name="{{ $tv->name }}" data-location="{{ $tv->location }}">
+                                                <div class="tv-screen">
+                                                    <div class="tv-name">{{ $tv->name }}</div>
+                                                    <div class="checkbox-wrapper">
+                                                        <input type="checkbox" id="tv-{{ $tv->id }}" name="tvs[]" value="{{ $tv->id }}" class="tv-checkbox">
+                                                        <label for="tv-{{ $tv->id }}"></label>
+                                                    </div>
+                                                </div>
+                                                <div class="text-center">{{ $tv->location }}</div>
+                                                <div class="form-group">
+                                                    <label for="turns-{{ $tv->id }}">{{ __('Number of Turns') }}</label>
+                                                    <input type="number" name="turns[{{ $tv->id }}]" id="turns-{{ $tv->id }}" class="form-control" placeholder="{{ __('Enter turns') }}">
+                                                </div>
+                                            </div>
+                                        @endforeach
                                     </div>
-                                    <div class="text-center">{{ $tv->location }}</div>
                                 </div>
                             @endforeach
                         </div>
@@ -58,17 +75,55 @@
     </div>
 </div>
 
-<!-- JavaScript for Select All and Search -->
+<!-- JavaScript to manage tabs, checkboxes, and search -->
 <script>
-    // Select All / Deselect All functionality
-    document.getElementById('select-all-btn').addEventListener('click', function () {
-        const checkboxes = document.querySelectorAll('#tv-list input[type="checkbox"]');
-        const selectAll = this.textContent.trim() === "{{ __('lang.select_all') }}";
-        checkboxes.forEach(checkbox => checkbox.checked = selectAll);
-        this.textContent = selectAll ? "{{ __('lang.deselect_all') }}" : "{{ __('lang.select_all') }}";
+document.addEventListener('DOMContentLoaded', function () {
+    // Preserve TV selections when switching between tabs
+    let selectedTvs = {};
+
+    // Function to save selected checkboxes
+    function saveSelectedTvs() {
+        const checkboxes = document.querySelectorAll('.tv-checkbox');
+        checkboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                selectedTvs[checkbox.value] = true;
+            } else {
+                delete selectedTvs[checkbox.value];
+            }
+        });
+    }
+
+    // Restore selected TVs when switching tabs
+    function restoreSelectedTvs() {
+        const checkboxes = document.querySelectorAll('.tv-checkbox');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = !!selectedTvs[checkbox.value];
+        });
+    }
+
+    // Event listener for each tab
+    document.querySelectorAll('.nav-link').forEach(tab => {
+        tab.addEventListener('click', function () {
+            saveSelectedTvs();
+            restoreSelectedTvs();
+        });
     });
 
-    // Search functionality for filtering TV list
+    // Select All / Deselect All functionality for each tab
+    document.querySelectorAll('.select-all-btn').forEach(button => {
+        button.addEventListener('click', function () {
+            const institutionId = this.getAttribute('data-institution-id');
+            const checkboxes = document.querySelectorAll(`#tv-list-${institutionId} input[type="checkbox"]`);
+            const selectAll = this.textContent.trim() === "{{ __('lang.select_all') }}";
+            checkboxes.forEach(checkbox => checkbox.checked = selectAll);
+            this.textContent = selectAll ? "{{ __('lang.deselect_all') }}" : "{{ __('lang.select_all') }}";
+
+            // Save the selection after selecting/deselecting
+            saveSelectedTvs();
+        });
+    });
+
+    // Search functionality (can be global or per tab)
     document.getElementById('search-tvs').addEventListener('keyup', function () {
         const searchTerm = this.value.toLowerCase();
         const tvItems = document.querySelectorAll('.tv-item');
@@ -82,5 +137,14 @@
             }
         });
     });
+});
 </script>
 @endsection
+
+@push('css')
+<!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- Bootstrap JS (necessary for tab toggling) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+@endpush

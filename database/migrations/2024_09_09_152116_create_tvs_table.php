@@ -17,6 +17,11 @@ return new class extends Migration
             $table->unsignedInteger('screen_id'); // Remove the auto-increment here
             $table->string('location');
             $table->boolean('is_active')->default(0);
+
+            $table->unsignedBigInteger('institution_id')->nullable();
+            $table->foreign('institution_id')->references('id')->on('institutions')
+            ->onUpdate('CASCADE')->onDelete('CASCADE');
+
             $table->timestamps();
         });
         

@@ -8,6 +8,7 @@ use App\Models\Tv;
 use App\Models\AdSchedule;
 use App\Models\AdDisplayTime;
 use App\Models\TvDisplayTime;
+use App\Models\Institution;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Admin\TvDisplayTimeController;
 
@@ -52,14 +53,18 @@ class AdController extends Controller
 
     public function chooseTvs(Advertisement $ad)
     {
-        $tvs = Tv::all();
-
-        if ($tvs->isEmpty()) {
+        // Get all institutions with their related TVs
+        $institutions = Institution::with('tvs')->get();
+    
+        // Check if there are any TVs available
+        if ($institutions->isEmpty() || $institutions->every(fn($institution) => $institution->tvs->isEmpty())) {
             return redirect()->route('ads.index')->with('error', __('lang.no_tvs_available'));
         }
-
-        return view('admin.ads.choose_tvs', compact('ad', 'tvs'));
+    
+        // Pass the advertisement and the institutions (with TVs) to the view
+        return view('admin.ads.choose_tvs', compact('ad', 'institutions'));
     }
+    
 
     public function storeTvs(Request $request, Advertisement $ad)
     {
@@ -67,49 +72,46 @@ class AdController extends Controller
             'tvs' => 'sometimes|array',
             'start_at' => 'required|date',
             'end_at' => 'required|date|after_or_equal:start_at',
+            'turns' => 'sometimes|array', // Validate turns input
         ]);
-
+    
         $selectedTvs = $data['tvs'] ?? [];
-
+        $turnsData = $data['turns'] ?? [];
+    
+        // Remove any AdSchedules that are no longer selected
         AdSchedule::where('advertisement_id', $ad->id)
             ->whereNotIn('tv_id', $selectedTvs)
             ->delete();
-            // dd($ad->id);
-        // dd(AdSchedule::where('advertisement_id', $ad->id)
-        // ->whereNotIn('tv_id', $selectedTvs)
-        // ->delete());
+    
         foreach ($selectedTvs as $tv_id) {
             $startDate = new \DateTime($data['start_at']);
             $endDate = new \DateTime($data['end_at']);
-            $endDate->modify('+1 day');
             $interval = new \DateInterval('P1D');
             $dateRange = new \DatePeriod($startDate, $interval, $endDate);
-
+    
             foreach ($dateRange as $date) {
                 $formattedDate = $date->format('Y-m-d');
                 $maxOrder = AdSchedule::where('tv_id', $tv_id)
                     ->where('date', $formattedDate)
                     ->max('order') ?? 0;
-
-                $existingSchedule = AdSchedule::where('advertisement_id', $ad->id)
-                    ->where('tv_id', $tv_id)
-                    ->where('date', $formattedDate)
-                    ->first();
-
-                $adSchedule = AdSchedule::create([
+    
+                $turns = $turnsData[$tv_id] ?? 1; // Default to 1 if no input is given
+    
+                AdSchedule::create([
                     'advertisement_id' => $ad->id,
                     'tv_id' => $tv_id,
                     'date' => $formattedDate,
                     'order' => $maxOrder + 1,
+                    'turns' => $turns,
                 ]);
-
+    
                 $this->recalculateDisplayTimes($tv_id, $formattedDate);
-
             }
         }
-
+    
         return redirect()->route('ads.index')->with('success', __('lang.ad_tv_assignment_updated'));
     }
+    
 
     public function updatescheduleads(Request $request,$ad)
     {   
@@ -173,8 +175,8 @@ class AdController extends Controller
 
         $firstDate = $assignedTvs->min('date');
         $lastDate = $assignedTvs->max('date');
-
-        return view('admin.ads.edit', compact('ad', 'assignedTvs', 'tvs', 'clients', 'firstDate', 'lastDate'));
+        $institutions=Institution::all();
+        return view('admin.ads.edit', compact('ad', 'assignedTvs', 'tvs', 'clients', 'firstDate', 'lastDate','institutions'));
     }
 
     public function update(Request $request, Advertisement $ad)
@@ -226,7 +228,73 @@ class AdController extends Controller
     
         return redirect()->route('ads.edit', $ad->id)->with('success', __('lang.ad_updated_with_schedules'));
     }
+
+    public function addSingleDay(Request $request, $ad_id)
+    {
+        // Validate the incoming data
+        $data = $request->validate([
+            'tvs_single_day' => 'required|array|min:1',
+            'tvs_single_day.*' => 'exists:tvs,id',
+            'date' => 'required|date',
+            'turns' => 'required|array',  // Validate turns array
+            'turns.*' => 'integer|min:1'  // Each turn must be a positive integer
+        ]);
     
+        $ad = Advertisement::findOrFail($ad_id);
+    
+        foreach ($data['tvs_single_day'] as $tv_id) {
+            $turns = $data['turns'][$tv_id] ?? 1; // Default to 1 if no turns specified
+    
+            // Check if a schedule already exists for the TV and date
+            $existingSchedule = AdSchedule::where('advertisement_id', $ad_id)
+                ->where('tv_id', $tv_id)
+                ->where('date', $data['date'])
+                ->first();
+    
+            if ($existingSchedule) {
+                continue; // Skip if the schedule exists
+            }
+    
+            // Get the max order for this TV and date
+            $maxOrder = AdSchedule::where('tv_id', $tv_id)
+                ->where('date', $data['date'])
+                ->max('order') ?? 0;
+    
+            // Create the new schedule
+            AdSchedule::create([
+                'advertisement_id' => $ad_id,
+                'tv_id' => $tv_id,
+                'date' => $data['date'],
+                'order' => $maxOrder + 1,
+                'turns' => $turns // Store the turns value
+            ]);
+    
+            // Recalculate display times for the TV and date
+            $this->recalculateDisplayTimes($tv_id, $data['date']);
+        }
+    
+        return redirect()->route('ads.edit', $ad_id)->with('success', __('lang.single_day_added_successfully'));
+    }
+    
+
+    public function deleteSchedule($ad_id, $schedule_id)
+    {
+        // Fetch the schedule to delete
+        $schedule = AdSchedule::findOrFail($schedule_id);
+    
+        // Delete related display times
+        if ($schedule->displayTimes()->exists()) {
+            $schedule->displayTimes()->delete();
+        }
+    
+        // Delete the schedule itself
+        $schedule->delete();
+    
+        // Recalculate display times for the TV and date
+        $this->recalculateDisplayTimes($schedule->tv_id, $schedule->date);
+    
+        return redirect()->route('ads.edit', $ad_id)->with('success', __('lang.schedule_deleted_successfully'));
+    }
     
     private function recalculateDisplayTimes($tv_id, $date)
     {
