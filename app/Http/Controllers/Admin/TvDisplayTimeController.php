@@ -118,16 +118,17 @@ class TvDisplayTimeController extends Controller
         // Get the display time to be edited
         $displayTime = TvDisplayTime::findOrFail($id);
         
-        // Fetch all TVs for selection
-        $tvs = Tv::where('id', $displayTime->tv_id)->get();
+        // Fetch all institutions with their TVs
+        $institutions = Institution::with('tvs')->get();
         
         // Fetch all the currently assigned TVs for this display time
         $assignedTvs = TvDisplayTime::where('date', $displayTime->date)
                                     ->where('start_time', $displayTime->start_time)
                                     ->where('end_time', $displayTime->end_time)
-                                    ->pluck('tv_id')->toArray();
+                                    ->pluck('tv_id')
+                                    ->toArray();
 
-        return view('admin.tv_display_times.edit', compact('displayTime', 'tvs', 'assignedTvs'));
+        return view('admin.tv_display_times.edit', compact('displayTime', 'institutions', 'assignedTvs'));
     }
 
     public function update(Request $request, $id)

@@ -61,7 +61,7 @@ class TvController extends Controller
         // Get the maximum screen_id and increment it for the new TV
         $maxScreenId = Tv::max('screen_id');
         $data['screen_id'] = $maxScreenId ? $maxScreenId + 1 : 1;
-    
+    	
         Tv::create($data);
         return redirect()->route('tvs.index')->with('success', __('messages.tv_added_successfully'));
     }

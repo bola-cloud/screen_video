@@ -30,22 +30,36 @@
                         <input type="time" name="end_time" class="form-control" value="{{ $displayTime->end_time }}" required>
                     </div>
 
-                    <!-- Button to select/deselect all TVs -->
-                    <button type="button" id="select-all" class="btn btn-secondary mb-4">Select All</button>
+                    <!-- Tabs for Institutions -->
+                    <ul class="nav nav-tabs" id="tvTabs" role="tablist">
+                        @foreach ($institutions as $institution)
+                            <li class="nav-item">
+                                <a class="nav-link {{ $loop->first ? 'active' : '' }}" id="tab-{{ $institution->id }}" data-toggle="tab" href="#institution-{{ $institution->id }}" role="tab">{{ $institution->name }}</a>
+                            </li>
+                        @endforeach
+                    </ul>
 
-                    <!-- TV Grid Display -->
-                    <div class="row">
-                        @foreach ($tvs as $tv)
-                            <div class="col-md-2">
-                                <div class="tv-screen">
-                                    <div class="tv-name">{{ $tv->name }}</div>
-                                    <div class="checkbox-wrapper">
-                                        <input type="checkbox" id="tv-{{ $tv->id }}" name="tvs[]" value="{{ $tv->id }}"
-                                        {{ in_array($tv->id, $assignedTvs) ? 'checked' : '' }}>
-                                        <label for="tv-{{ $tv->id }}"></label>
-                                    </div>
+                    <!-- TV Display with Checkbox grouped by Institution -->
+                    <div class="tab-content mt-3" id="tvTabContent">
+                        @foreach ($institutions as $institution)
+                            <div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}" id="institution-{{ $institution->id }}" role="tabpanel">
+                                <button type="button" class="btn btn-sm btn-secondary select-all-institution" data-institution="{{ $institution->id }}">Select All TVs for {{ $institution->name }}</button>
+                                <div class="row mt-3">
+                                    @foreach ($institution->tvs as $tv)
+                                        <div class="col-md-2">
+                                            <div class="tv-screen">
+                                                <div class="tv-name">{{ $tv->name }}</div>
+                                                <div class="checkbox-wrapper">
+                                                    <!-- Use a unique name for the Add Single Day TV selection -->
+                                                    <input type="checkbox" id="tv-single-day-{{ $tv->id }}" name="tvs[]" value="{{ $tv->id }}"
+                                                    {{ in_array($tv->id, $assignedTvs) ? 'checked' : '' }}>
+                                                    <label for="tv-single-day-{{ $tv->id }}"></label>
+                                                </div>
+                                            </div>
+                                            <div class="text-center">{{ $tv->location }}</div>
+                                        </div>
+                                    @endforeach
                                 </div>
-                                <div class="text-center">{{ $tv->location }}</div>
                             </div>
                         @endforeach
                     </div>
@@ -60,9 +74,15 @@
 </div>
 
 <script>
-    document.getElementById('select-all').addEventListener('click', function() {
-        const checkboxes = document.querySelectorAll('input[type="checkbox"][name="tvs[]"]');
-        checkboxes.forEach(checkbox => checkbox.checked = true);
+    // Select all checkboxes for an institution
+    document.querySelectorAll('.select-all-institution').forEach(function(button) {
+        button.addEventListener('click', function() {
+            const institutionId = this.getAttribute('data-institution');
+            const checkboxes = document.querySelectorAll('#institution-' + institutionId + ' input[type="checkbox"]');
+            checkboxes.forEach(function(checkbox) {
+                checkbox.checked = true;
+            });
+        });
     });
 </script>
 @endsection

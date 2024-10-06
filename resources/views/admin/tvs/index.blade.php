@@ -44,7 +44,7 @@
                                 <th>{{ __('lang.name') }}</th>
                                 <th>{{ __('lang.location') }}</th>
                                 <th>{{ __('lang.institution') }}</th>
-                                <th>{{ __('lang.is_active') }}</th>
+                                {{-- <th>{{ __('lang.is_active') }}</th> --}}
                                 <th>{{ __('lang.actions') }}</th>
                             </tr>
                         </thead>
@@ -55,9 +55,9 @@
                                     <td>{{ $tv->name }}</td>
                                     <td>{{ $tv->location }}</td>
                                     <td>{{ $tv->institution->name ?? 'N/A' }}</td>
-                                    <td>
+                                    {{-- <td>
                                         <input type="checkbox" class="is_active_switch" data-id="{{ $tv->id }}" {{ $tv->is_active ? 'checked' : '' }}>
-                                    </td>
+                                    </td> --}}
                                     <td class="d-flex">
                                         <a href="{{ route('tvs.edit', $tv->id) }}" class="btn btn-warning">{{ __('lang.edit') }}</a>
                                         <a href="{{ route('tv.ad-order', $tv->id) }}" class="btn btn-info mr-2 ml-2">{{ __('lang.show_orders') }}</a>
