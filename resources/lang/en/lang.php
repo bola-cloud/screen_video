@@ -304,4 +304,6 @@ return [
     'location' => 'Location',
     'actions' => 'Actions',
     'delete' => 'Delete',
+    'online' => 'Online',
+    'offline' => 'Offline',
 ];

@@ -34,6 +34,7 @@ Route::get('/ads/client/{client_id}', [ClientController::class, 'getAdsByClient'
 
 Route::get('/tvs/{ad_id}', [ClientController::class, 'getTvsByAd']);
 Route::get('/fetch-ads/{tv_id}/{advertisement_id}/{date}', [ClientController::class, 'getAds']);
+Route::post('/tv-status/{id}', [TvController::class, 'updateStatus']);
 
 // Protected route (requires authentication via Sanctum)
 Route::middleware('auth:sanctum')->group(function () {

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->unsignedInteger('screen_id'); // Remove the auto-increment here
             $table->string('location');
-            $table->boolean('status');
+            $table->boolean('status')->default(0);
             $table->boolean('is_active')->default(0);
 
             $table->unsignedBigInteger('institution_id')->nullable();

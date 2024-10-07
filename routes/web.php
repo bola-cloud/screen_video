@@ -62,7 +62,10 @@ Route::group([
     // })->name('dashboard');
 });
 
-
+Route::get('/status', function () {
+    // Simulate a successful response (TV is online)
+    return response()->json(['status' => 'online'], 200);
+});
 
 // Language switch route
 Route::get('lang/{lang}', function ($lang) {

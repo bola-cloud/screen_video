@@ -333,4 +333,6 @@ return [
     'schedule_deleted_successfully' => 'تم حذف الجدول بنجاح',
     'single_day_added_successfully' => 'تمت إضافة اليوم بنجاح',
     'turns' => 'عدد مرات العرض',
+    'online' => 'متصل ',
+    'offline' => 'غير متصل',
 ];

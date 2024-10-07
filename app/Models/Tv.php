@@ -14,6 +14,7 @@ class Tv extends Model
         'location',
         'is_active',
         'institution_id',
+        'status',
     ];
 
     // Relationships
